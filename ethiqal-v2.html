@@ -1,0 +1,834 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ethiqal</title>
+<meta name="description" content="Scan a barcode to see who owns the brand and what public sources say about the company.">
+<meta name="theme-color" content="#F2F4F6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0B1117" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Ethiqal">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAIAAADdvvtQAAAB60lEQVR42u3WwQmAIBSAYSdwgM6uEd0bv4VyAAl7QlLxwX/Up8h3MOWlSMMlTyCABJAAEkASQAJIAAkgCSABJIAEkASQABJAAkgCSAAJIAEkgCSABJAAEkASQAJIAAkgCSABJIAEkASQABJAAkgASQAJIAEkgCSABJAAEkASQAJIAAkgCSB9G9B5bG1XC+5PiE7rbuweHVoQuvNDlwcIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAggggAACCCCAAAIIIIAAAgigKJp91cwAEkAAAeQP5A8EEEAAAQQQQAABBBBAAAEEEEAAAQQQQAABBBBAAAEEEEAAAQQQQAABBBBAAAEEEEAAAQQQQAABBBBAAAEEEEAAAQQQQAABBBBAAAEEEEAAAQQQQAABBBBAAAEEEEAAAQQQQAABBBBAAAEEEEAAAQQQQPpdAAkgASSABJAEkAASQAJIAkgACSABJAEkgASQAJIAEkACSAAJIAkgASSABJAEkAASQAJIAkgACSABJAEkgASQABJAEkACSAAJIAkgASSABJAEkAASQAJIAkgA6TVV9toqg1y9lJQAAAAASUVORK5CYII=" type="image/png">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAABv0lEQVR42u3WzQmAIBiAYSdogM6uEd0bv4VsAEO+hBDrgffmL/IcTMuapduSJxAcgkNwCA7BITgEh+AQHIJDgkNwCA7BITgEh+AQHIJDcEhwCA7BITgEh+AQHIJDcAgOCQ7BITgEh+AQHIJDcAgOwSE4JDgEh+AQHIJDcAgOwfGgcu519Wh8bWST9vz2WcHR4N06NoEDDjjggAMOOOCAAw444IADDjjggAMOOOCAAw444IADDjjggAMOOOCAAw444IADDjjggAMOOOCAAw444IADDjjggAMOOOCAAw444IADDjjggAMOOOCAAw444IADDjjggAOOETjKsemN4BAc+icOfw5/DjjggAMOOOCAAw444IADDjjggAMOOOCAAw444IADDjjggAMOOOCAAw444IADDjjggAMOOOCAAw444IADDjjggAMOOOCAAw444IADDjjggAMOOOCAAw444IADDjjggAMOOGbGobmCQ3AIDsEhOASH4BAcgkNwCA4JDsEhOASH4BAcgkNwCA7BIcEhOASH4BAcgkNwCA7BITgkOASH4BAcgkNwCA7BITgEh+CQ4BAcgkNwCA7BITgEh77bBZCUmGdCqWXiAAAAAElFTkSuQmCC">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js" defer></script>
+<style>
+/* Layout: one phone-width column. Scan screen is a camera card with a search box under it; results are a scrolling page that fills in section by section as each data source answers. */
+:root {
+  --bg: #F2F4F6;
+  --surface: #FFFFFF;
+  --ink: #0E1A24;
+  --muted: #56646F;
+  --line: #D7DDE2;
+  --chip: #E8ECEF;
+  --accent: #FFD23F;
+  --on-accent: #0E1A24;
+  --scope: #0A1016;
+  --scope-ink: #A9B6C1;
+  --laser: #FF4A3D;
+  --clear: #17734D; --clear-bg: #DDF3E8;
+  --minor: #8F5200; --minor-bg: #FBE9CC;
+  --serious: #A3201F; --serious-bg: #F9DAD8;
+  --font-display: "Space Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0B1117; --surface: #141D26; --ink: #EAF0F4; --muted: #96A5B1; --line: #25323E; --chip: #1E2A35;
+    --clear: #5FD3A0; --clear-bg: #12332A; --minor: #F2B25C; --minor-bg: #3A2A10; --serious: #FF8A84; --serious-bg: #401A19;
+    color-scheme: dark;
+  }
+}
+
+* , *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 var(--font-body);
+  min-height: 100vh; min-height: 100dvh;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.app { max-width: 560px; margin: 0 auto; padding-block: calc(env(safe-area-inset-top, 0px) + 12px) calc(env(safe-area-inset-bottom, 0px) + 56px); }
+h1 { font: 700 28px/1.1 var(--font-display); letter-spacing: -0.02em; margin: 0 0 8px; text-wrap: balance; overflow-wrap: anywhere; }
+h2 { font: 600 12px/1 var(--font-data); letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin: 30px 0 12px; }
+h3 { font: 600 16px/1.25 var(--font-display); margin: 0; }
+p { margin: 0; }
+a { color: inherit; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+h1:focus { outline: none; }
+[hidden] { display: none !important; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; min-height: 40px; }
+.brand { display: flex; align-items: center; gap: 10px; font: 600 19px/1 var(--font-display); letter-spacing: -0.01em; text-decoration: none; }
+.brand svg { width: 26px; height: 22px; }
+.ghost { all: unset; box-sizing: border-box; cursor: pointer; font-weight: 600; font-size: 14px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); }
+.ghost:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+.btn { font: 600 15px/1 var(--font-body); padding: 14px 18px; border-radius: 10px; border: 0; cursor: pointer; background: var(--accent); color: var(--on-accent); }
+.btn:active { filter: brightness(0.94); }
+.btn[disabled] { opacity: 0.6; cursor: default; }
+
+/* Camera */
+.cam {
+  position: relative; width: 100%; height: min(58vh, 480px); height: min(58dvh, 480px); min-height: 320px;
+  background: var(--scope); border-radius: 18px; overflow: hidden; color: var(--scope-ink);
+}
+.cam video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: none; }
+.cam[data-state="live"] video { display: block; }
+.reticle { position: absolute; left: 9%; right: 9%; top: 30%; bottom: 30%; display: none; pointer-events: none; }
+.cam[data-state="live"] .reticle { display: block; }
+.reticle i { position: absolute; width: 28px; height: 28px; border: 0 solid var(--accent); }
+.reticle .a { top: 0; left: 0; border-top-width: 4px; border-left-width: 4px; border-top-left-radius: 8px; }
+.reticle .b { top: 0; right: 0; border-top-width: 4px; border-right-width: 4px; border-top-right-radius: 8px; }
+.reticle .c { bottom: 0; left: 0; border-bottom-width: 4px; border-left-width: 4px; border-bottom-left-radius: 8px; }
+.reticle .d { bottom: 0; right: 0; border-bottom-width: 4px; border-right-width: 4px; border-bottom-right-radius: 8px; }
+.reticle .laser { position: absolute; left: 4%; right: 4%; top: 8%; height: 2px; background: var(--laser); box-shadow: 0 0 12px 2px rgba(255, 74, 61, 0.55); animation: sweep 2s ease-in-out infinite alternate; }
+@keyframes sweep { from { top: 8%; } to { top: 90%; } }
+@media (prefers-reduced-motion: reduce) { .reticle .laser { animation: none; top: 50%; } }
+.cam .overlay { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 14px; text-align: center; padding: 24px; }
+.cam[data-state="live"] .overlay { display: none; }
+.cam .overlay p { max-width: 28ch; font-size: 14px; }
+.cam .overlay .big { font: 600 20px/1.2 var(--font-display); color: #fff; }
+.camtools { position: absolute; left: 12px; right: 12px; bottom: 12px; display: none; justify-content: space-between; gap: 8px; }
+.cam[data-state="live"] .camtools { display: flex; }
+.camtools .ghost { background: rgba(10, 16, 22, 0.72); color: #fff; border-color: rgba(255, 255, 255, 0.25); }
+.camhint { position: absolute; top: 12px; left: 0; right: 0; text-align: center; font-size: 13px; color: #fff; display: none; text-shadow: 0 1px 4px rgba(0,0,0,0.7); }
+.cam[data-state="live"] .camhint { display: block; }
+
+/* Search */
+.search { display: flex; gap: 8px; margin-top: 16px; }
+.search input {
+  flex: 1 1 auto; min-width: 0; font: 400 16px/1 var(--font-body); padding: 14px 12px; border-radius: 10px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+}
+.msg { min-height: 20px; margin-top: 8px; font-size: 13px; color: var(--muted); }
+.msg.bad { color: var(--serious); }
+
+/* Lists */
+.rows { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.rows li { border-bottom: 1px solid var(--line); }
+.rows button { all: unset; box-sizing: border-box; cursor: pointer; width: 100%; padding: 13px 4px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.rows button:focus-visible { outline: 3px solid var(--ink); outline-offset: -2px; }
+.rows .nm { font-weight: 600; display: block; overflow-wrap: anywhere; }
+.rows .sb { color: var(--muted); font-size: 13px; display: block; }
+.rows .when { font: 400 12px/1 var(--font-data); color: var(--muted); white-space: nowrap; }
+
+/* Result */
+.back { all: unset; cursor: pointer; display: inline-flex; gap: 6px; font-weight: 600; font-size: 14px; margin-bottom: 16px; }
+.back:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+.phead { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 10px; }
+.phead img { width: 76px; height: 76px; object-fit: contain; background: #fff; border-radius: 10px; border: 1px solid var(--line); flex: none; }
+.phead > div { min-width: 0; }
+.gline { font: 400 12px/1.4 var(--font-data); color: var(--muted); overflow-wrap: anywhere; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.chip { font: 500 11px/1 var(--font-data); background: var(--chip); color: var(--muted); padding: 6px 8px; border-radius: 4px; }
+.chip.sev1 { background: var(--minor-bg); color: var(--minor); }
+.chip.sev2 { background: var(--serious-bg); color: var(--serious); }
+.eco { display: flex; align-items: center; gap: 12px; margin-top: 16px; padding: 12px; border: 1px solid var(--line); background: var(--surface); border-radius: 12px; }
+.eco .grade { font: 700 22px/1 var(--font-display); width: 42px; height: 42px; display: grid; place-items: center; border-radius: 8px; flex: none; }
+.eco .grade.A { background: #1E8F4E; color: #fff; } .eco .grade.B { background: #7BC043; color: #0E1A24; }
+.eco .grade.C { background: #F2C230; color: #0E1A24; } .eco .grade.D { background: #F08A24; color: #0E1A24; }
+.eco .grade.E { background: #D8402E; color: #fff; }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+.chain { list-style: none; margin: 0; padding: 0; }
+.chain li { position: relative; padding: 0 0 18px 28px; }
+.chain li:last-child { padding-bottom: 0; }
+.chain li::before { content: ""; position: absolute; left: 5px; top: 8px; bottom: -8px; width: 2px; background: var(--line); }
+.chain li:last-child::before { display: none; }
+.chain li::after { content: ""; position: absolute; left: 0; top: 6px; width: 12px; height: 12px; border-radius: 50%; background: var(--surface); border: 2px solid var(--ink); }
+.chain li:last-child::after { background: var(--ink); }
+.chain .role { font: 500 11px/1 var(--font-data); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 4px; }
+.chain .who { font-weight: 600; overflow-wrap: anywhere; }
+.chain .note { color: var(--muted); font-size: 13px; }
+details.pick { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 12px; }
+details.pick summary { cursor: pointer; font-weight: 600; font-size: 14px; }
+.cands { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 6px; }
+.cands button { all: unset; box-sizing: border-box; cursor: pointer; width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; display: block; }
+.cands button[aria-current="true"] { border-color: var(--ink); }
+.cands button:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+
+.cat { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; }
+.cat header { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.heads { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 12px; }
+.heads li { border-top: 1px solid var(--line); padding-top: 10px; }
+.heads a { font-weight: 500; text-decoration-thickness: 1px; text-underline-offset: 3px; overflow-wrap: anywhere; }
+.heads .meta { font: 400 12px/1.4 var(--font-data); color: var(--muted); margin-top: 4px; overflow-wrap: anywhere; }
+.caveat { font-size: 13px; color: var(--muted); font-style: italic; margin-top: 10px; }
+.finds { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.finds li { border-top: 1px solid var(--line); padding-top: 12px; }
+.finds li:first-child { border-top: 0; padding-top: 0; }
+.finds .m { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+
+.loading { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 14px; }
+.spin { width: 16px; height: 16px; border: 2px solid var(--line); border-top-color: var(--ink); border-radius: 50%; animation: spin 0.8s linear infinite; flex: none; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spin { animation-duration: 3s; } }
+.err { color: var(--serious); font-size: 14px; }
+.inline-link { background: none; border: 0; padding: 0; text-decoration: underline; cursor: pointer; font-weight: 600; }
+.foot { margin-top: 28px; font-size: 12px; color: var(--muted); }
+.areas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.area { border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 12px; display: grid; gap: 8px; align-content: start; }
+.area .nm { font-size: 13px; font-weight: 500; }
+.pill { font: 600 11px/1.2 var(--font-data); letter-spacing: 0.05em; text-transform: uppercase; padding: 5px 7px; border-radius: 4px; justify-self: start; }
+.pill.l0 { background: var(--clear-bg); color: var(--clear); }
+.pill.l1 { background: var(--minor-bg); color: var(--minor); }
+.pill.l2 { background: var(--serious-bg); color: var(--serious); }
+.pill.wait { background: var(--chip); color: var(--muted); }
+details.how { margin-top: 28px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 14px 16px; }
+details.how summary { cursor: pointer; font-weight: 600; }
+details.how p { margin-top: 10px; color: var(--muted); font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <a class="brand" href="#" aria-label="Ethiqal home">
+      <svg viewBox="0 0 26 22" aria-hidden="true" fill="currentColor"><rect x="0" y="0" width="2" height="22"/><rect x="4" y="0" width="1" height="22"/><rect x="7" y="0" width="3" height="22"/><rect x="12" y="0" width="1" height="22"/><rect x="15" y="0" width="2" height="22"/><rect x="19" y="0" width="1" height="22"/><rect x="22" y="0" width="4" height="22"/></svg>
+      <span>Ethiqal</span>
+    </a>
+    <button class="ghost" type="button" id="hist-btn">History</button>
+  </header>
+  <main id="view"></main>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- helpers ---------- */
+  function $(s, r) { return (r || document).querySelector(s); }
+  function el(tag, attrs, kids) {
+    var n = document.createElement(tag);
+    if (attrs) Object.keys(attrs).forEach(function (k) {
+      var v = attrs[k];
+      if (v == null || v === false) return;
+      if (k === "class") n.className = v;
+      else if (k === "text") n.textContent = v;
+      else if (k.slice(0, 2) === "on") n.addEventListener(k.slice(2), v);
+      else n.setAttribute(k, v === true ? "" : v);
+    });
+    (kids || []).forEach(function (c) {
+      if (c == null || c === false) return;
+      n.appendChild(typeof c === "string" ? document.createTextNode(c) : c);
+    });
+    return n;
+  }
+  function mount(node, kids) { node.textContent = ""; kids.forEach(function (k) { if (k) node.appendChild(k); }); }
+  function loading(text) { return el("div", { class: "loading", role: "status" }, [el("span", { class: "spin" }), el("span", { text: text })]); }
+  function safeGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function safeSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+
+  function getJSON(url, ms) {
+    var ctl = new AbortController();
+    var t = setTimeout(function () { ctl.abort(); }, ms || 10000);
+    return fetch(url, { signal: ctl.signal }).then(function (r) {
+      return r.text().then(function (txt) {
+        clearTimeout(t);
+        try { return JSON.parse(txt); } catch (e) { throw new Error(txt.slice(0, 140) || "Bad response"); }
+      });
+    }, function (e) { clearTimeout(t); throw e; });
+  }
+
+  /* ---------- barcodes ---------- */
+  function checkOk(code) {
+    var n = code.length, sum = 0;
+    for (var i = 0; i < n - 1; i++) sum += +code[i] * (((n - 1 - i) % 2 === 1) ? 3 : 1);
+    return (10 - sum % 10) % 10 === +code[n - 1];
+  }
+  function validCode(c) { return /^(\d{8}|\d{12}|\d{13})$/.test(c) && checkOk(c); }
+  function normalize(c) { return c.length === 12 ? "0" + c : c; }
+  var REGIONS = [[0,139,"the US or Canada"],[300,379,"France"],[400,440,"Germany"],[450,459,"Japan"],[490,499,"Japan"],[500,509,"the United Kingdom"],[520,521,"Greece"],[539,539,"Ireland"],[560,560,"Portugal"],[569,569,"Iceland"],[570,579,"Denmark"],[590,590,"Poland"],[594,594,"Romania"],[600,601,"South Africa"],[619,619,"Tunisia"],[621,621,"Syria"],[622,622,"Egypt"],[625,625,"Jordan"],[626,626,"Iran"],[627,627,"Kuwait"],[628,628,"Saudi Arabia"],[629,629,"the United Arab Emirates"],[640,649,"Finland"],[690,699,"China"],[700,709,"Norway"],[729,729,"Israel"],[730,739,"Sweden"],[740,745,"Central America"],[750,750,"Mexico"],[754,755,"Canada"],[760,769,"Switzerland"],[770,771,"Colombia"],[780,780,"Chile"],[789,790,"Brazil"],[800,839,"Italy"],[840,849,"Spain"],[870,879,"the Netherlands"],[880,880,"South Korea"],[885,885,"Thailand"],[888,888,"Singapore"],[890,890,"India"],[893,893,"Vietnam"],[899,899,"Indonesia"],[900,919,"Austria"],[930,939,"Australia"],[940,949,"New Zealand"],[955,955,"Malaysia"]];
+  function region(code) {
+    var p = +code.slice(0, 3);
+    for (var i = 0; i < REGIONS.length; i++) if (p >= REGIONS[i][0] && p <= REGIONS[i][1]) return REGIONS[i][2];
+    return "an unlisted region";
+  }
+
+  /* ---------- data sources ---------- */
+  var FIELDS = "code,product_name,brands,quantity,image_front_small_url,ecoscore_grade,labels_tags";
+  var PRODUCT_SOURCES = [
+    { host: "world.openfoodfacts.org", name: "Open Food Facts" },
+    { host: "world.openbeautyfacts.org", name: "Open Beauty Facts" },
+    { host: "world.openproductsfacts.org", name: "Open Products Facts" }
+  ];
+  async function findProduct(code) {
+    var answered = 0, i;
+    for (i = 0; i < PRODUCT_SOURCES.length; i++) {
+      try {
+        var s = PRODUCT_SOURCES[i];
+        var j = await getJSON("https://" + s.host + "/api/v2/product/" + code + ".json?fields=" + FIELDS);
+        answered++;
+        if (j && j.status === 1 && j.product) return { p: j.product, source: s.name };
+      } catch (e) { /* try next source */ }
+    }
+    if (!answered) throw new Error("offline");
+    return null;
+  }
+
+  var BIZ = { Q431289: 1, Q4830453: 1, Q783794: 1, Q6881511: 1, Q891723: 1, Q167037: 1, Q2085381: 1 };
+  async function wdSearch(name) {
+    var j = await getJSON("https://www.wikidata.org/w/api.php?action=wbsearchentities&search=" + encodeURIComponent(name) + "&language=en&uselang=en&type=item&limit=6&format=json&origin=*");
+    return j.search || [];
+  }
+  async function wdEntities(ids) {
+    var j = await getJSON("https://www.wikidata.org/w/api.php?action=wbgetentities&ids=" + ids.join("|") + "&props=claims|labels|descriptions&languages=en&format=json&origin=*");
+    return j.entities || {};
+  }
+  function lbl(e) { return (e.labels && e.labels.en && e.labels.en.value) || e.id; }
+  function dsc(e) { return (e.descriptions && e.descriptions.en && e.descriptions.en.value) || ""; }
+  function entityIds(e, prop) {
+    var cl = (e.claims && e.claims[prop]) || [], out = [];
+    cl.forEach(function (c) {
+      if (c.rank === "deprecated") return;
+      if (c.qualifiers && c.qualifiers.P582) return; // ended
+      var dv = c.mainsnak && c.mainsnak.datavalue;
+      if (dv && dv.value && dv.value.id) out.push({ id: dv.value.id, pref: c.rank === "preferred" ? 0 : 1 });
+    });
+    out.sort(function (a, b) { return a.pref - b.pref; });
+    return out.map(function (o) { return o.id; });
+  }
+  async function findCandidates(name) {
+    var hits = await wdSearch(name);
+    if (!hits.length) return { list: [], best: 0 };
+    var ents = await wdEntities(hits.map(function (h) { return h.id; }));
+    var list = hits.map(function (h, idx) {
+      var e = ents[h.id] || { id: h.id }, score = 0;
+      if (entityIds(e, "P749").length || entityIds(e, "P127").length) score += 2;
+      entityIds(e, "P31").forEach(function (t) { if (BIZ[t]) score = Math.max(score, score + 1); });
+      return { id: h.id, label: h.label || lbl(e), desc: h.description || dsc(e), score: score, idx: idx };
+    });
+    var best = 0;
+    list.forEach(function (c, i) { if (c.score > list[best].score) best = i; });
+    return { list: list, best: best };
+  }
+  async function buildChain(startId) {
+    var chain = [], seen = {}, id = startId;
+    for (var i = 0; i < 6 && id && !seen[id]; i++) {
+      seen[id] = 1;
+      var ents = await wdEntities([id]);
+      var e = ents[id];
+      if (!e) break;
+      chain.push({ id: id, label: lbl(e), desc: dsc(e) });
+      var ps = entityIds(e, "P749");
+      if (!ps.length) ps = entityIds(e, "P127");
+      id = ps[0];
+    }
+    return chain;
+  }
+
+  /* Add hand-checked findings here. Key = the company's Wikidata ID (for example "Q1234").
+     tier: judgment | regulator | reporting.  lvl: 1 minor, 2 serious.  cat: env | lab | law | pol.
+     Only add a finding if you have a source anyone can open.
+     Example:
+     "Q1234": { "name": "Example plc", "findings": [ { "cat": "env", "lvl": 2, "tier": "regulator", "year": 2023, "text": "What the source says.", "source": "Agency, document title", "url": "https://example.org/doc" } ] } */
+  var FINDINGS_INLINE = {};
+  var FINDINGS = null;
+  async function loadFindings() {
+    if (FINDINGS) return FINDINGS;
+    FINDINGS = FINDINGS_INLINE;
+    return FINDINGS;
+  }
+
+  function cleanName(n) {
+    var c = n.replace(/\b(inc|ltd|llc|plc|corp|corporation|company|co|ag|sa|se|nv|gmbh|holdings?)\b\.?/gi, " ").replace(/[(),."]/g, " ").replace(/\s+/g, " ").trim();
+    return c.length >= 3 ? c : n;
+  }
+  function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  var BUCKETS = [
+    { k: "env", n: "Environment", q: '(pollution OR deforestation OR "oil spill" OR emissions OR greenwashing OR "environmental damage")', re: /pollut|spill|emission|deforest|toxic|environment|climate|waste|greenwash|contaminat|carbon|palm oil/i },
+    { k: "lab", n: "Labor and human rights", q: '("child labor" OR "child labour" OR "forced labor" OR "forced labour" OR "worker safety" OR "labor violations" OR "human rights")', re: /child labou?r|forced labou?r|sweatshop|worker|strike|union|wage|unsafe|exploit|traffick|human rights|slavery/i },
+    { k: "law", n: "Corruption and legal", q: '(bribery OR corruption OR fraud OR lawsuit OR fined OR antitrust OR sanctions OR "money laundering")', re: /brib|corrupt|fraud|lawsuit|sued|\bfined\b|\bfines\b|penalt|settle|antitrust|probe|investigat|sanction|convict|charged|launder|price.fixing/i },
+    { k: "pol", n: "Political and personal ties", q: '(Epstein OR lobbying OR "political donations" OR "campaign contributions")', re: /epstein|lobby|donation|donor|campaign|political|\bpac\b/i }
+  ];
+  var gdeltLast = 0, gdeltChain = Promise.resolve(), newsCache = {};
+  function fetchText(url, ms) {
+    var ctl = new AbortController();
+    var t = setTimeout(function () { ctl.abort(); }, ms || 15000);
+    return fetch(url, { signal: ctl.signal }).then(function (r) { return r.text(); }).then(function (x) { clearTimeout(t); return x; }, function (e) { clearTimeout(t); throw e; });
+  }
+  async function fetchGdelt(url) {
+    for (var attempt = 0; attempt < 3; attempt++) {
+      var txt = await fetchText(url);
+      if (!txt.trim()) return []; // the service answers with an empty body when nothing matches
+      try { var j = JSON.parse(txt); return j.articles || []; }
+      catch (e) {
+        if (/limit|one every|too many/i.test(txt)) { await sleep(6000); gdeltLast = Date.now(); continue; }
+        throw new Error(txt.slice(0, 140));
+      }
+    }
+    throw new Error("The news service is busy. Try again in a minute.");
+  }
+  // One request at a time, at least 5.3 seconds apart, because the free service asks for that.
+  function gdelt(url, alive) {
+    var run = gdeltChain.then(async function () {
+      if (!alive()) return null;
+      var wait = gdeltLast + 5300 - Date.now();
+      if (wait > 0) await sleep(wait);
+      if (!alive()) return null;
+      gdeltLast = Date.now();
+      return fetchGdelt(url);
+    });
+    gdeltChain = run.catch(function () {});
+    return run;
+  }
+  async function newsFor(name, bucket, alive) {
+    var c = cleanName(name), key = c.toLowerCase() + "|" + bucket.k;
+    if (newsCache[key]) return newsCache[key];
+    var q = '"' + c + '" ' + bucket.q + " sourcelang:english";
+    var arts = await gdelt("https://api.gdeltproject.org/api/v2/doc/doc?query=" + encodeURIComponent(q) + "&mode=artlist&maxrecords=50&format=json", alive);
+    if (arts === null) return null;
+    var low = c.toLowerCase(), seen = {}, out = [];
+    arts.forEach(function (a) {
+      var t = (a.title || "").trim(), k = t.toLowerCase();
+      if (!t || seen[k] || k.indexOf(low) === -1 || !bucket.re.test(t)) return;
+      seen[k] = 1; out.push(a);
+    });
+    newsCache[key] = out;
+    return out;
+  }
+  // 0 = Low (0 to 2 headlines), 1 = Medium (3 to 9), 2 = High (10 or more)
+  function newsLevel(arts) { var n = arts.length; return n >= 10 ? 2 : n >= 3 ? 1 : 0; }
+  function fmtDate(s) { return s && s.length >= 8 ? s.slice(0, 4) + "-" + s.slice(4, 6) + "-" + s.slice(6, 8) : ""; }
+
+  /* ---------- history ---------- */
+  function getHist() { try { return JSON.parse(safeGet("ethiqal.history") || "[]"); } catch (e) { return []; } }
+  function addHist(item) {
+    var h = getHist().filter(function (x) { return x.key !== item.key; });
+    h.unshift(item);
+    safeSet("ethiqal.history", JSON.stringify(h.slice(0, 40)));
+  }
+  function ago(ts) {
+    var m = Math.round((Date.now() - ts) / 60000);
+    if (m < 1) return "now"; if (m < 60) return m + " min"; var h = Math.round(m / 60);
+    if (h < 24) return h + " h"; return Math.round(h / 24) + " d";
+  }
+
+  /* ---------- camera ---------- */
+  var stream = null, scanning = false, timer = null, det = null, zx = null, torchOn = false;
+  var canvas = document.createElement("canvas");
+  var cctx = canvas.getContext("2d", { willReadFrequently: true });
+
+  function setCam(state, text) {
+    var cam = $("#cam"); if (!cam) return;
+    cam.setAttribute("data-state", state);
+    var o = $("#cam-msg"); if (o && text != null) o.textContent = text;
+    var b = $("#cam-start"); if (b) { b.hidden = !(state === "idle" || state === "denied" || state === "error"); b.textContent = state === "idle" ? "Start camera" : "Try again"; }
+  }
+  function initDetector() {
+    det = null; zx = null;
+    if ("BarcodeDetector" in window) {
+      try { det = new window.BarcodeDetector({ formats: ["ean_13", "ean_8", "upc_a", "upc_e"] }); return; } catch (e) { det = null; }
+    }
+    if (window.ZXing) {
+      var hints = new Map();
+      hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [ZXing.BarcodeFormat.EAN_13, ZXing.BarcodeFormat.EAN_8, ZXing.BarcodeFormat.UPC_A, ZXing.BarcodeFormat.UPC_E]);
+      hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
+      zx = new ZXing.MultiFormatReader();
+      zx.setHints(hints);
+    }
+  }
+  async function startCamera() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setCam("error", "This browser can't open the camera here. Type the barcode below instead."); return;
+    }
+    setCam("starting", "Starting camera…");
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false });
+    } catch (e) {
+      if (e && e.name === "NotAllowedError") setCam("denied", "Camera access is blocked. Allow the camera for this site in your browser settings, then try again. You can also type the barcode below.");
+      else setCam("error", "No camera found or it's in use by another app. You can type the barcode below.");
+      return;
+    }
+    var video = $("#video");
+    if (!video) { stopCamera(); return; }
+    video.muted = true;
+    video.srcObject = stream;
+    try { await video.play(); } catch (e) {}
+    try { await stream.getVideoTracks()[0].applyConstraints({ advanced: [{ focusMode: "continuous" }] }); } catch (e) {}
+    setCam("live");
+    var tb = $("#torch");
+    try { var caps = stream.getVideoTracks()[0].getCapabilities(); if (tb) tb.hidden = !(caps && caps.torch); } catch (e) { if (tb) tb.hidden = true; }
+    initDetector();
+    if (!det && !zx) { stopCamera(); setCam("error", "Barcode reading didn't load. Check your connection and reload, or type the barcode below."); return; }
+    scanning = true; tick();
+  }
+  function stopCamera() {
+    scanning = false; torchOn = false;
+    if (timer) { clearTimeout(timer); timer = null; }
+    if (stream) { stream.getTracks().forEach(function (t) { t.stop(); }); stream = null; }
+    var v = $("#video"); if (v) v.srcObject = null;
+  }
+  async function detectOnce() {
+    var video = $("#video");
+    if (!video) return null;
+    if (det) { var r = await det.detect(video); return r && r.length ? r[0].rawValue : null; }
+    if (zx) {
+      var w = video.videoWidth, h = video.videoHeight;
+      if (!w) return null;
+      var cw = Math.min(w, 960), ch = Math.round(h * cw / w);
+      canvas.width = cw; canvas.height = ch;
+      cctx.drawImage(video, 0, 0, cw, ch);
+      try {
+        var src = new ZXing.HTMLCanvasElementLuminanceSource(canvas);
+        return zx.decode(new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(src))).getText();
+      } catch (e) { return null; }
+    }
+    return null;
+  }
+  async function tick() {
+    if (!scanning) return;
+    try {
+      var v = await detectOnce();
+      if (v && validCode(v)) { onCode(v); return; }
+    } catch (e) {}
+    if (scanning) timer = setTimeout(tick, 140);
+  }
+  function onCode(v) {
+    stopCamera();
+    try { if (navigator.vibrate) navigator.vibrate(40); } catch (e) {}
+    location.hash = "p-" + normalize(v);
+  }
+  async function toggleTorch() {
+    if (!stream) return;
+    torchOn = !torchOn;
+    try { await stream.getVideoTracks()[0].applyConstraints({ advanced: [{ torch: torchOn }] }); } catch (e) { torchOn = !torchOn; }
+    var tb = $("#torch"); if (tb) tb.textContent = torchOn ? "Light on" : "Light";
+  }
+
+  /* ---------- screens ---------- */
+  var view = $("#view");
+  var nav = 0;
+
+  function handleQuery(raw, msgEl) {
+    var v = raw.trim();
+    if (!v) return;
+    var digits = v.replace(/[\s-]/g, "");
+    if (/^\d+$/.test(digits)) {
+      if (!/^(\d{8}|\d{12}|\d{13})$/.test(digits)) { msgEl.className = "msg bad"; msgEl.textContent = "Barcodes have 8, 12 or 13 digits."; return; }
+      if (!checkOk(digits)) { msgEl.className = "msg bad"; msgEl.textContent = "The last digit doesn't match the others. Recheck the number under the barcode."; return; }
+      location.hash = "p-" + normalize(digits);
+    } else {
+      location.hash = "b-" + encodeURIComponent(v);
+    }
+  }
+  function searchForm(placeholder, label) {
+    var msg = el("p", { class: "msg", role: "status", "aria-live": "polite" });
+    var input = el("input", { id: "q", type: "text", inputmode: "search", autocomplete: "off", autocapitalize: "off", placeholder: placeholder, "aria-label": label });
+    var form = el("form", { class: "search", novalidate: true, onsubmit: function (e) { e.preventDefault(); msg.className = "msg"; msg.textContent = ""; handleQuery(input.value, msg); } },
+      [input, el("button", { class: "btn", type: "submit", text: "Look up" })]);
+    return { form: form, msg: msg };
+  }
+
+  function renderScan() {
+    var cam = el("div", { class: "cam", id: "cam", "data-state": "idle" }, [
+      el("video", { id: "video", playsinline: true, muted: true, autoplay: true }),
+      el("div", { class: "reticle", "aria-hidden": "true" }, [el("i", { class: "a" }), el("i", { class: "b" }), el("i", { class: "c" }), el("i", { class: "d" }), el("div", { class: "laser" })]),
+      el("p", { class: "camhint", text: "Line the barcode up inside the frame" }),
+      el("div", { class: "overlay" }, [
+        el("p", { class: "big", text: "Who is behind the label?" }),
+        el("p", { id: "cam-msg", text: "Scan a product barcode to see who owns the brand and what public sources say about the company." }),
+        el("button", { class: "btn", type: "button", id: "cam-start", text: "Start camera", onclick: startCamera })
+      ]),
+      el("div", { class: "camtools" }, [
+        el("button", { class: "ghost", type: "button", id: "torch", hidden: true, text: "Light", onclick: toggleTorch }),
+        el("button", { class: "ghost", type: "button", text: "Stop", onclick: function () { stopCamera(); setCam("idle", "Camera stopped."); } })
+      ])
+    ]);
+    var sf = searchForm("Barcode number or brand name", "Barcode number or brand name");
+    var hist = getHist().slice(0, 3);
+    mount(view, [
+      cam, sf.form, sf.msg,
+      hist.length ? el("h2", { text: "Recent" }) : null,
+      hist.length ? histList(hist) : null,
+      el("p", { class: "foot", text: "Ethiqal gathers public information. It doesn't judge companies, and what it finds can be incomplete or wrong. Check the sources before deciding anything." })
+    ]);
+    // Resume automatically when the camera is already allowed.
+    try {
+      if (navigator.permissions && navigator.permissions.query) {
+        navigator.permissions.query({ name: "camera" }).then(function (s) { if (s.state === "granted" && $("#cam") && !stream) startCamera(); }, function () {});
+      }
+    } catch (e) {}
+  }
+
+  function histList(items) {
+    return el("ul", { class: "rows" }, items.map(function (h) {
+      return el("li", null, [el("button", { type: "button", onclick: function () { location.hash = h.key; } }, [
+        el("span", null, [el("span", { class: "nm", text: h.name }), el("span", { class: "sb", text: h.sub || "" })]),
+        el("span", { class: "when", text: ago(h.t) })
+      ])]);
+    }));
+  }
+
+  function renderHistory() {
+    var h = getHist();
+    mount(view, [
+      el("button", { class: "back", type: "button", onclick: function () { location.hash = ""; }, text: "← Scan" }),
+      el("h1", { tabindex: "-1", id: "ptitle", text: "History" }),
+      h.length ? histList(h) : el("p", { class: "muted", text: "Nothing yet. Products you look up will appear here, saved only on this phone." }),
+      h.length ? el("p", null, [el("button", { class: "inline-link", type: "button", text: "Clear history", onclick: function () { safeSet("ethiqal.history", "[]"); renderHistory(); } })]) : null
+    ]);
+    var t = $("#ptitle"); if (t) t.focus({ preventScroll: true });
+  }
+
+  function section(title) {
+    var body = el("div");
+    return { root: el("section", null, [el("h2", { text: title }), body]), body: body };
+  }
+  function backBtn() { return el("button", { class: "back", type: "button", onclick: function () { location.hash = ""; }, text: "← Scan another" }); }
+  function prettyLabel(t) { return t.replace(/^[a-z]{2}:/, "").replace(/-/g, " "); }
+
+  function noticeFoot(src) {
+    return el("div", null, [
+      el("details", { class: "how" }, [el("summary", { text: "How the scores work" }),
+        el("p", { text: "Each area is searched in news from roughly the last 3 months. Only headlines that name the company and match the topic are counted. Low is 0 to 2 headlines, Medium is 3 to 9, and High is 10 or more." }),
+        el("p", { text: "A score shows how much coverage exists, not that the company did something wrong. Verified findings added to the file count more heavily and are marked verified." })]),
+      el("p", { class: "foot", text: "Sources: " + src + ". All of these are community-edited or automatic, so they can be wrong or out of date. Check the links before deciding anything." })
+    ]);
+  }
+
+  /* company block: ownership + curated findings + news; fills in as each source answers */
+  function companyBlock(query, token, note) {
+    var own = section("Who owns it"), ver = section("Verified findings"), news = section("Score by area");
+    var root = el("div", null, [own.root, news.root, ver.root]);
+    ver.body.appendChild(loading("Checking verified findings…"));
+    news.body.appendChild(el("p", { class: "muted small", text: "Waiting for ownership…" }));
+
+    function alive() { return token === nav; }
+
+    var verLvl = { env: 0, lab: 0, law: 0, pol: 0 }, newsLvl = {}, newsInfo = {}, tiles = {};
+    function paintTile(k) {
+      var t = tiles[k]; if (!t) return;
+      var v = verLvl[k] || 0, info = newsInfo[k], n = newsLvl[k];
+      if (info && info.error && !v) { t.pill.className = "pill wait"; t.pill.textContent = "Unavailable"; return; }
+      if ((n === undefined || n === null) && !v) { t.pill.className = "pill wait"; t.pill.textContent = "Checking…"; return; }
+      var lv = Math.max(n || 0, v);
+      t.pill.className = "pill l" + lv;
+      var txt = (info && info.count === 0 && !v) ? "None found" : ["Low", "Medium", "High"][lv];
+      if (v && v >= (n || 0)) txt += " · verified";
+      t.pill.textContent = txt;
+    }
+    function paintAll() { BUCKETS.forEach(function (b) { paintTile(b.k); }); }
+
+    async function renderNews(name) {
+      newsLvl = {}; newsInfo = {}; tiles = {};
+      var grid = el("div", { class: "areas" }), cards = el("div", { style: "margin-top:12px" });
+      BUCKETS.forEach(function (b) {
+        var pill = el("span", { class: "pill wait", text: "Checking…" });
+        tiles[b.k] = { pill: pill };
+        grid.appendChild(el("div", { class: "area" }, [el("span", { class: "nm", text: b.n }), pill]));
+      });
+      mount(news.body, [
+        el("p", { class: "muted small", style: "margin-bottom:12px", text: "Each area is scored from recent news headlines about “" + cleanName(name) + "”. The score shows how much coverage exists, not proven wrongdoing. Areas fill in one at a time." }),
+        grid, cards
+      ]);
+      paintAll();
+      for (var i = 0; i < BUCKETS.length; i++) {
+        var b = BUCKETS[i];
+        var chip = el("span", { class: "chip", text: "Searching…" });
+        var card = el("div", { class: "cat" }, [el("header", null, [el("h3", { text: b.n }), chip])]);
+        cards.appendChild(card);
+        try {
+          var arts = await newsFor(name, b, alive);
+          if (!alive() || arts === null) return;
+          var outlets = {}; arts.forEach(function (a) { outlets[a.domain] = 1; });
+          newsLvl[b.k] = newsLevel(arts); newsInfo[b.k] = { count: arts.length };
+          chip.textContent = arts.length ? arts.length + (arts.length === 1 ? " headline" : " headlines") + " · " + Object.keys(outlets).length + (Object.keys(outlets).length === 1 ? " outlet" : " outlets") : "None found";
+          if (arts.length) {
+            card.appendChild(el("ul", { class: "heads" }, arts.slice(0, 5).map(function (a) {
+              return el("li", null, [
+                el("a", { href: a.url, target: "_blank", rel: "noopener noreferrer", text: a.title }),
+                el("p", { class: "meta", text: (a.domain || "") + (a.seendate ? " · " + fmtDate(a.seendate) : "") })
+              ]);
+            })));
+            if (arts.length > 5) card.appendChild(el("p", { class: "muted small", style: "margin-top:10px", text: "Showing 5 of " + arts.length + " headlines." }));
+          } else {
+            card.appendChild(el("p", { class: "muted small", style: "margin-top:8px", text: "No matching headlines in the last few months. That doesn't mean the company is clear." }));
+          }
+          if (b.k === "pol") card.appendChild(el("p", { class: "caveat", text: "A headline that puts a company next to a name or topic doesn't mean the company did anything wrong." }));
+        } catch (e) {
+          if (!alive()) return;
+          newsInfo[b.k] = { error: true };
+          chip.textContent = "Unavailable";
+          card.appendChild(el("p", { class: "err", style: "margin-top:8px", text: "Couldn't load this area." }));
+          card.appendChild(el("p", { class: "gline", text: "Details: " + (e && e.message ? e.message : "unknown error") }));
+          card.appendChild(el("p", null, [el("button", { class: "inline-link", type: "button", text: "Try again", onclick: function () { renderNews(name); } })]));
+        }
+        paintAll();
+      }
+    }
+
+    async function renderVerified(chain, name) {
+      var f = await loadFindings();
+      if (!alive()) return;
+      verLvl = { env: 0, lab: 0, law: 0, pol: 0 };
+      var hits = [];
+      chain.forEach(function (c) { if (f[c.id] && f[c.id].findings) f[c.id].findings.forEach(function (x) { hits.push({ f: x, who: c.label }); }); });
+      hits.forEach(function (h) { if (verLvl[h.f.cat] !== undefined) verLvl[h.f.cat] = Math.max(verLvl[h.f.cat], h.f.lvl === 2 ? 2 : 1); });
+      paintAll();
+      if (!hits.length) {
+        mount(ver.body, [el("p", { class: "muted", text: "No hand-checked findings on file for " + name + ". That doesn't mean the company is clear." })]);
+        return;
+      }
+      var cat = { env: "Environment", lab: "Labor and human rights", law: "Corruption and legal", pol: "Political and personal ties" };
+      var tier = { judgment: "Court judgment", regulator: "Regulator finding", reporting: "Credible reporting" };
+      mount(ver.body, [el("div", { class: "card" }, [el("ul", { class: "finds" }, hits.map(function (h) {
+        var x = h.f;
+        return el("li", null, [
+          el("div", { class: "m" }, [el("span", { class: "chip sev" + (x.lvl === 2 ? 2 : 1), text: x.lvl === 2 ? "Serious" : "Minor" }), el("span", { class: "chip", text: cat[x.cat] || "Other" }), el("span", { class: "chip", text: tier[x.tier] || "Source" }), x.year ? el("span", { class: "chip", text: String(x.year) }) : null]),
+          el("p", { text: x.text }),
+          el("p", { class: "gline", style: "margin-top:6px" }, [h.who + " · ", x.url ? el("a", { href: x.url, target: "_blank", rel: "noopener noreferrer", text: x.source || x.url }) : (x.source || "")])
+        ]);
+      }))])]);
+    }
+
+    async function choose(cands, i) {
+      var c = cands.list[i];
+      mount(own.body, [loading("Tracing owners of " + c.label + "…")]);
+      var chain;
+      try { chain = await buildChain(c.id); } catch (e) {
+        if (!alive()) return;
+        mount(own.body, [el("p", { class: "err", text: "Couldn't reach Wikidata just now." }), el("p", null, [el("button", { class: "inline-link", type: "button", text: "Try again", onclick: function () { choose(cands, i); } })])]);
+        return;
+      }
+      if (!alive()) return;
+      var last = chain[chain.length - 1] || { label: c.label, id: c.id };
+      var items = chain.map(function (n, k) {
+        var role = chain.length === 1 ? "Company" : k === 0 ? "Matched" : k === chain.length - 1 ? "Ultimate parent on record" : "Owned by";
+        return el("li", null, [el("span", { class: "role", text: role }), el("span", { class: "who", text: n.label }),
+          el("div", { class: "note" }, [n.desc ? n.desc + " · " : "", el("a", { href: "https://www.wikidata.org/wiki/" + n.id, target: "_blank", rel: "noopener noreferrer", text: n.id })])]);
+      });
+      var picker = null;
+      if (cands.list.length > 1) {
+        picker = el("details", { class: "pick" }, [el("summary", { text: "Not the right company?" }),
+          el("ul", { class: "cands" }, cands.list.map(function (x, k) {
+            return el("li", null, [el("button", { type: "button", "aria-current": k === i ? "true" : "false", onclick: function () { choose(cands, k); } }, [
+              el("span", { class: "nm", style: "font-weight:600", text: x.label }), el("span", { class: "sb muted small", style: "display:block", text: x.desc || "No description" })])]);
+          }))]);
+      }
+      mount(own.body, [
+        el("div", { class: "card" }, [
+          el("ol", { class: "chain" }, items),
+          chain.length === 1 ? el("p", { class: "muted small", style: "margin-top:12px", text: "Wikidata lists no parent company here. It may be independent, or the record may be incomplete." }) : null,
+          picker
+        ]),
+        note ? el("p", { class: "muted small", style: "margin-top:8px", text: note }) : null
+      ]);
+      mount(ver.body, [loading("Checking verified findings…")]);
+      renderVerified(chain, last.label);
+      renderNews(last.label);
+    }
+
+    (async function run() {
+      mount(own.body, [loading("Looking up “" + query + "”…")]);
+      var cands;
+      try { cands = await findCandidates(query); } catch (e) {
+        if (!alive()) return;
+        mount(own.body, [el("p", { class: "err", text: "Couldn't reach Wikidata. Check your connection." }), el("p", null, [el("button", { class: "inline-link", type: "button", text: "Try again", onclick: run }) ])]);
+        mount(ver.body, []); mount(news.body, []);
+        return;
+      }
+      if (!alive()) return;
+      if (!cands.list.length) {
+        mount(own.body, [el("p", { class: "muted", text: "No company called “" + query + "” found in Wikidata. Try another spelling or the maker's name." })]);
+        mount(ver.body, [el("p", { class: "muted", text: "Nothing to check without a company match." })]);
+        renderNews(query);
+        return;
+      }
+      choose(cands, cands.best);
+    })();
+    return root;
+  }
+
+  function renderBrand(name, token) {
+    addHist({ key: "b-" + encodeURIComponent(name), name: name, sub: "Brand search", t: Date.now() });
+    mount(view, [
+      backBtn(),
+      el("h1", { tabindex: "-1", id: "ptitle", text: name }),
+      el("p", { class: "muted", text: "Brand or company search" }),
+      companyBlock(name, token, "Matched by name from Wikidata. Use “Not the right company?” if it picked the wrong one."),
+      noticeFoot("Wikidata, GDELT news index")
+    ]);
+    var t = $("#ptitle"); if (t) t.focus({ preventScroll: true });
+  }
+
+  async function renderProduct(code, token) {
+    mount(view, [backBtn(), el("h1", { text: code }), loading("Looking up this barcode…")]);
+    var found;
+    try { found = await findProduct(code); } catch (e) {
+      if (token !== nav) return;
+      mount(view, [backBtn(), el("h1", { text: "Can't connect" }), el("p", { class: "muted", text: "The product databases didn't answer. Check your connection and try again." }),
+        el("p", { style: "margin-top:14px" }, [el("button", { class: "btn", type: "button", text: "Try again", onclick: function () { renderProduct(code, token); } })])]);
+      return;
+    }
+    if (token !== nav) return;
+    if (!found) {
+      var sf = searchForm("Company or brand name", "Company or brand name");
+      mount(view, [backBtn(), el("h1", { text: "Not in the database yet" }),
+        el("p", { class: "muted", text: "Barcode " + code + " (issued in " + region(code) + ") isn't in Open Food Facts, Open Beauty Facts or Open Products Facts. These are crowd-sourced, so new products are added by people like you." }),
+        el("p", { style: "margin-top:12px" }, [el("a", { href: "https://world.openfoodfacts.org/product/" + code, target: "_blank", rel: "noopener noreferrer", text: "Add this product on Open Food Facts" })]),
+        el("h2", { text: "Look up the company instead" }), sf.form, sf.msg]);
+      return;
+    }
+    var p = found.p;
+    var name = p.product_name || "Unnamed product";
+    var brand = (p.brands || "").split(",")[0].trim();
+    addHist({ key: "p-" + code, name: name, sub: brand || found.source, t: Date.now() });
+    var grade = (p.ecoscore_grade || "").toUpperCase();
+    var eco = /^[A-E]$/.test(grade) ? el("div", { class: "eco" }, [el("span", { class: "grade " + grade, text: grade }),
+      el("div", null, [el("p", { style: "font-weight:600", text: "Eco-Score for this product" }), el("p", { class: "muted small", text: "Rates the product's environmental footprint from ingredients, packaging and origin. It says nothing about the company behind it." })])]) : null;
+    var labels = (p.labels_tags || []).slice(0, 6);
+    var companyArea;
+    if (brand) companyArea = companyBlock(brand, token, "Owner traced from the brand name “" + brand + "” using Wikidata. Check the match is right.");
+    else {
+      var sf2 = searchForm("Company or brand name", "Company or brand name");
+      companyArea = el("div", null, [el("h2", { text: "Who owns it" }), el("p", { class: "muted", text: "This product has no brand listed. Search for the company yourself." }), sf2.form, sf2.msg]);
+    }
+    mount(view, [
+      backBtn(),
+      el("div", { class: "phead" }, [
+        p.image_front_small_url ? el("img", { src: p.image_front_small_url, alt: "", loading: "lazy" }) : null,
+        el("div", null, [el("h1", { tabindex: "-1", id: "ptitle", text: name }), el("p", { class: "muted", text: [brand, p.quantity].filter(Boolean).join(" · ") })])
+      ]),
+      el("p", { class: "gline", text: code + " · barcode issued in " + region(code) }),
+      labels.length ? el("div", { class: "chips" }, labels.map(function (l) { return el("span", { class: "chip", text: prettyLabel(l) }); })) : null,
+      eco, companyArea,
+      noticeFoot(found.source + ", Wikidata, GDELT news index")
+    ]);
+    var t = $("#ptitle"); if (t) t.focus({ preventScroll: true });
+  }
+
+  function route() {
+    nav++;
+    var token = nav;
+    stopCamera();
+    var h = location.hash.slice(1);
+    if (h.indexOf("p-") === 0) {
+      var code = h.slice(2);
+      if (validCode(code)) renderProduct(code, token); else renderScan();
+    } else if (h.indexOf("b-") === 0) {
+      var nm = ""; try { nm = decodeURIComponent(h.slice(2)); } catch (e) {}
+      if (nm) renderBrand(nm, token); else renderScan();
+    } else if (h === "history") renderHistory();
+    else renderScan();
+    window.scrollTo(0, 0);
+  }
+
+  $("#hist-btn").addEventListener("click", function () { location.hash = "history"; });
+  window.addEventListener("hashchange", route);
+  document.addEventListener("visibilitychange", function () { if (document.hidden && stream) { stopCamera(); setCam("idle", "Camera paused. Tap to start again."); } });
+  route();
+
+})();
+</script>
+</body>
+</html>
