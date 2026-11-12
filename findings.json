@@ -1,0 +1,17 @@
+{
+  "_readme": "Verified findings you add by hand. Each key is a Wikidata ID of a company (for example Q1234). Only add a finding if you have a source anyone can open. Tiers: judgment (court), regulator (agency decision), reporting (credible journalism). lvl: 1 = minor, 2 = serious. cat: env, lab, law or pol. Copy the _example entry, rename its key to the real Wikidata ID, and fill it in.",
+  "_example": {
+    "name": "Example Company plc",
+    "findings": [
+      {
+        "cat": "env",
+        "lvl": 2,
+        "tier": "regulator",
+        "year": 2023,
+        "text": "One or two plain sentences describing what the source says.",
+        "source": "Name of the agency or outlet and document title",
+        "url": "https://example.org/the-actual-document"
+      }
+    ]
+  }
+}
